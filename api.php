@@ -1,5 +1,5 @@
 <?php
-$root = realpath(__DIR__ . '/../'); // one level up to /images (where symlinks are)
+/*$root = realpath(__DIR__ . '/../'); // one level up to /images (where symlinks are)*/
 
 /*function safe_path($path) {
   global $root;
@@ -79,8 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
       generate_thumbnail($full, $thumb);
       $out[] = [
         "name" => $file,
-        "type" => "file",
-        "path" => "$relative",
+	"type" => "file",
+	/*	"path" => "/$relative", */
+	/*        "path" => "/images/$relative", */
+	"path" => "$relative",
         "thumb" => "/.thumbnails/$relative"
       ];
     }

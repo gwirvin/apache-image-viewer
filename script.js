@@ -57,7 +57,8 @@ function renderImages(images) {
       const image = document.createElement('img');
       image.src = img.thumb;
       image.className = 'thumbnail';
-      image.dataset.full = `${root}/${img.path}`;
+//      image.dataset.full = `${root}/${img.path}`;
+      image.dataset.full = img.path;
       image.addEventListener('click', () => openModal(image.dataset.full));
       grid.appendChild(image);
     });
