@@ -6,6 +6,52 @@ body {
   color: white;
 }
 
+#breadcrumb {
+  margin-bottom: 1em;
+  padding: 0.5em;
+  background: #222;
+  border-radius: 4px;
+}
+
+#breadcrumb a {
+  color: #4CAF50;
+  text-decoration: none;
+  margin-right: 0.5em;
+}
+
+#breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+#directory-list {
+  margin-bottom: 2em;
+}
+
+#directory-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#directory-list li {
+  margin: 0.5em 0;
+  padding: 0.5em;
+  background: #222;
+  border-radius: 4px;
+}
+
+#directory-list a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-size: 1.1em;
+  display: block;
+}
+
+#directory-list a:hover {
+  color: #66BB6A;
+  text-decoration: underline;
+}
+
 #image-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -18,26 +64,6 @@ body {
   cursor: pointer;
   border: 2px solid #444;
   border-radius: 4px;
-}
-
-.folder {
-  background: #333;
-  padding: 2em 1em;
-  text-align: center;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffd700;
-  font-size: 1.2em;
-  font-weight: bold;
-  border: 3px solid #666;
-}
-
-.folder:hover {
-  background: #555;
-  border-color: #ffd700;
-  color: #fff;
 }
 
 #modal {

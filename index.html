@@ -1,19 +1,13 @@
-<!--EAT MEsudo systemctl reload apache2!-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Image Viewer</title>
+  <title>Image Directory Browser</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="breadcrumb"></div>
-  <div style="margin-bottom: 1em;">
-    <button onclick="testAPI()" style="background: #333; color: white; border: 1px solid #666; padding: 0.5em 1em; border-radius: 4px; cursor: pointer;">Test API</button>
-    <button onclick="testDebug()" style="background: #333; color: white; border: 1px solid #666; padding: 0.5em 1em; border-radius: 4px; cursor: pointer;">Debug API</button>
-    <button onclick="forceHideModal()" style="background: #333; color: white; border: 1px solid #666; padding: 0.5em 1em; border-radius: 4px; cursor: pointer;">Force Hide Modal</button>
-    <button onclick="loadImages('')" style="background: #333; color: white; border: 1px solid #666; padding: 0.5em 1em; border-radius: 4px; cursor: pointer;">Reload Root</button>
-  </div>
+  <div id="directory-list"></div>
   <div id="image-grid"></div>
 
   <!-- Modal -->
