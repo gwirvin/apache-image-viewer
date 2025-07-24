@@ -1,132 +1,95 @@
-let currentDir = '';
-let imageList = [];
-let currentIndex = 0;
+const root = '/viewer';  // Adjust if your structure changes
 
-const directoryList = document.getElementById('directory-list');
-const imageGrid = document.getElementById('image-grid');
-const modal = document.getElementById('modal');
-const modalImg = document.getElementById('modal-img');
-const breadcrumb = document.getElementById('breadcrumb');
-
-function loadDirectory(dir = '') {
-  currentDir = dir;
-  console.log('Loading directory:', dir);
-  
-  fetch(`api.php?dir=${encodeURIComponent(dir)}`)
+// Load folder contents
+function loadDirectory(path) {
+  fetch(`${root}/api.php?dir=${encodeURIComponent(path)}`)
     .then(res => res.json())
     .then(data => {
-      console.log('API data received:', data);
-      
-      // Clear both containers
-      directoryList.innerHTML = '';
-      imageGrid.innerHTML = '';
-      imageList = [];
-
-      // Update breadcrumbs
-      updateBreadcrumbs(dir);
-
-      // Separate directories and files
-      const directories = data.filter(item => item.type === 'dir' && item.name !== 'viewer');
-      const files = data.filter(item => item.type === 'file');
-
-      // Show directories as text links
-      if (directories.length > 0) {
-        const ul = document.createElement('ul');
-        directories.forEach(item => {
-          const li = document.createElement('li');
-          const a = document.createElement('a');
-          a.href = '#';
-          a.textContent = `📁 ${item.name}`;
-          a.onclick = (e) => {
-            e.preventDefault();
-            loadDirectory(`${dir}/${item.name}`.replace(/^\/+/, ''));
-          };
-          li.appendChild(a);
-          ul.appendChild(li);
-        });
-        directoryList.appendChild(ul);
-      }
-
-      // Show images in grid (only when we're in a leaf directory with images)
-      if (files.length > 0) {
-        files.forEach((item, i) => {
-          const img = document.createElement('img');
-          img.src = item.thumb || item.path;
-          img.classList.add('thumbnail');
-          img.onclick = () => openModal(i);
-          imageGrid.appendChild(img);
-          imageList.push(item);
-        });
-      }
-
-      // Show message if empty directory
-      if (directories.length === 0 && files.length === 0) {
-        directoryList.innerHTML = '<p style="color: #999; font-style: italic;">Empty directory</p>';
-      }
-    })
-    .catch(error => {
-      console.error('Error loading directory:', error);
-      directoryList.innerHTML = '<p style="color: red;">Error loading directory. Check console for details.</p>';
+      updateBreadcrumb(path);
+      const folders = data.filter(item => item.type === 'dir');
+      const images = data.filter(item => item.type === 'file');
+      renderFolders(folders.map(f => f.name), path);
+      renderImages(images);
     });
 }
 
-function updateBreadcrumbs(dir) {
-  const parts = dir.split('/').filter(Boolean);
-  let path = '';
-  breadcrumb.innerHTML = `<a href="#" onclick="loadDirectory('')">🏠 Root</a>`;
-  
-  parts.forEach(part => {
-    path += (path ? '/' : '') + part;
-    breadcrumb.innerHTML += ` / <a href="#" onclick="loadDirectory('${path}')">${part}</a>`;
+// Breadcrumbs
+function updateBreadcrumb(path) {
+  const parts = path.split('/').filter(p => p);
+  const container = document.getElementById('breadcrumb');
+  container.innerHTML = `<a href="#" data-path="">Home</a>`;
+  let built = '';
+  parts.forEach((part, i) => {
+    built += '/' + part;
+    container.innerHTML += ` / <a href="#" data-path="${built.slice(1)}">${part}</a>`;
   });
 }
 
-function openModal(index) {
-  const img = imageList[index];
-  if (!img || img.type !== 'file') return;
+// Render folders
+function renderFolders(folders, path) {
+  const list = document.getElementById('directory-list');
+  list.innerHTML = '';
+  if (folders && folders.length) {
+    const ul = document.createElement('ul');
+    folders.forEach(folder => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = folder;
+      a.dataset.path = path ? `${path}/${folder}` : folder;
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        loadDirectory(a.dataset.path);
+      });
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    list.appendChild(ul);
+  }
+}
 
-  currentIndex = index;
-  modalImg.src = img.path;
-  document.getElementById('download-btn').href = img.path;
+// Render thumbnails
+function renderImages(images) {
+  const grid = document.getElementById('image-grid');
+  grid.innerHTML = '';
+  if (images && images.length) {
+    images.forEach(img => {
+      const image = document.createElement('img');
+      image.src = img.thumb;
+      image.className = 'thumbnail';
+      image.dataset.full = `${root}/${img.path}`;
+      image.addEventListener('click', () => openModal(image.dataset.full));
+      grid.appendChild(image);
+    });
+  }
+}
+
+// Modal functions
+function openModal(src) {
+  const modal = document.getElementById('modal');
+  const img = modal.querySelector('img');
+  img.src = src;
   modal.classList.remove('hidden');
 }
 
-function closeModal() { modal.classList.add('hidden'); }
-function showNext() { currentIndex = (currentIndex + 1) % imageList.length; openModal(currentIndex); }
-function showPrev() { currentIndex = (currentIndex - 1 + imageList.length) % imageList.length; openModal(currentIndex); }
-
-function deleteImage() {
-  const img = imageList[currentIndex];
-  fetch('api.php', {
-    method: 'POST',
-    body: JSON.stringify({ action: 'delete', path: img.path }),
-    headers: { 'Content-Type': 'application/json' }
-  }).then(() => {
-    imageList.splice(currentIndex, 1);
-    closeModal();
-    loadDirectory(currentDir);
-  });
+function closeModal() {
+  const modal = document.getElementById('modal');
+  modal.classList.add('hidden');
+  modal.querySelector('img').src = '';
 }
 
-function moveImage() {
-  const img = imageList[currentIndex];
-  fetch('api.php', {
-    method: 'POST',
-    body: JSON.stringify({ action: 'move', path: img.path }),
-    headers: { 'Content-Type': 'application/json' }
-  }).then(() => {
-    imageList.splice(currentIndex, 1);
-    closeModal();
-    loadDirectory(currentDir);
-  });
-}
+document.getElementById('close-modal').addEventListener('click', closeModal);
 
-document.getElementById('close-modal').onclick = closeModal;
-document.getElementById('prev-img').onclick = showPrev;
-document.getElementById('next-img').onclick = showNext;
-document.getElementById('delete-btn').onclick = deleteImage;
-document.getElementById('move-btn').onclick = moveImage;
+// Breadcrumb clicks
+document.getElementById('breadcrumb').addEventListener('click', function (e) {
+  if (e.target.tagName === 'A') {
+    e.preventDefault();
+    loadDirectory(e.target.dataset.path);
+  }
+});
 
-// Initialize the directory browser
-loadDirectory();
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+  loadDirectory('');
+});
 

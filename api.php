@@ -1,12 +1,18 @@
 <?php
 $root = realpath(__DIR__ . '/../'); // one level up to /images (where symlinks are)
 
-function safe_path($path) {
+/*function safe_path($path) {
   global $root;
   if (trim($path) === '') return $root;
   $full = realpath($root . '/' . $path);
   if (!$full || strpos($full, $root) !== 0) die("Invalid path");
   return $full;
+}*/
+
+function safe_path($path) {
+  global $root;
+  $clean = str_replace('..', '', $path); // Prevent parent traversal
+  return rtrim($root . '/' . ltrim($clean, '/'), '/');
 }
 
 function generate_thumbnail($src, $thumb_path) {
