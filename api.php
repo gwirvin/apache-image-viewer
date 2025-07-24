@@ -1,5 +1,5 @@
 <?php
-$root = realpath(__DIR__ . '/../'); // one level up to /images
+$root = realpath(__DIR__ . '/../'); // one level up to /images (where symlinks are)
 
 function safe_path($path) {
   global $root;
@@ -44,6 +44,20 @@ function generate_thumbnail($src, $thumb_path) {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
   $dir = isset($_GET['dir']) ? $_GET['dir'] : '';
   $path = safe_path($dir);
+  
+  // Debug info
+  if (isset($_GET['debug'])) {
+    header('Content-Type: application/json');
+    echo json_encode([
+      'root' => $root,
+      'requested_dir' => $dir,
+      'resolved_path' => $path,
+      'path_exists' => file_exists($path),
+      'is_readable' => is_readable($path)
+    ]);
+    exit;
+  }
+  
   $files = scandir($path);
   $out = [];
 

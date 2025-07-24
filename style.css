@@ -20,6 +20,23 @@ body {
   border-radius: 4px;
 }
 
+.folder {
+  background: #333;
+  padding: 2em 1em;
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd700;
+  font-size: 1.1em;
+}
+
+.folder:hover {
+  background: #555;
+  border-color: #ffd700;
+}
+
 #modal {
   position: fixed;
   inset: 0;

@@ -9,9 +9,14 @@ const breadcrumb = document.getElementById('breadcrumb');
 
 function loadImages(dir = '') {
   currentDir = dir;
+  console.log('Loading directory:', dir);
   fetch(`api.php?dir=${encodeURIComponent(dir)}`)
-    .then(res => res.json())
+    .then(res => {
+      console.log('API response status:', res.status);
+      return res.json();
+    })
     .then(data => {
+      console.log('API data received:', data);
       grid.innerHTML = '';
       imageList = [];
 
@@ -40,6 +45,10 @@ function loadImages(dir = '') {
           imageList.push(item);
         }
       });
+    })
+    .catch(error => {
+      console.error('Error loading images:', error);
+      grid.innerHTML = '<div style="color: red; padding: 2em;">Error loading directory. Check console for details.</div>';
     });
 }
 
