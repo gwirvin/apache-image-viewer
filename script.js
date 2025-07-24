@@ -15,18 +15,25 @@ function loadImages(dir = '') {
       grid.innerHTML = '';
       imageList = [];
 
-      breadcrumb.innerHTML = `<a href="#" onclick="loadImages('')">[root]</a> / ${dir}`;
+      // Breadcrumbs
+      const parts = dir.split('/').filter(Boolean);
+      let path = '';
+      breadcrumb.innerHTML = `<a href="#" onclick="loadImages('')">[root]</a>`;
+      parts.forEach(part => {
+        path += (path ? '/' : '') + part;
+        breadcrumb.innerHTML += ` / <a href="#" onclick="loadImages('${path}')">${part}</a>`;
+      });
 
       data.forEach((item, i) => {
         if (item.type === 'dir') {
           const div = document.createElement('div');
           div.innerHTML = `<strong>[${item.name}]</strong>`;
-          div.style.cursor = 'pointer';
+          div.classList.add('thumbnail', 'folder');
           div.onclick = () => loadImages(`${dir}/${item.name}`.replace(/^\/+/, ''));
           grid.appendChild(div);
         } else if (item.type === 'file') {
           const img = document.createElement('img');
-          img.src = item.path;
+          img.src = item.thumb || item.path;
           img.classList.add('thumbnail');
           img.onclick = () => openModal(i);
           grid.appendChild(img);
@@ -37,26 +44,17 @@ function loadImages(dir = '') {
 }
 
 function openModal(index) {
-  currentIndex = index;
   const img = imageList[index];
+  if (!img || img.type !== 'file') return;
+
   modalImg.src = img.path;
   document.getElementById('download-btn').href = img.path;
   modal.classList.remove('hidden');
 }
 
-function closeModal() {
-  modal.classList.add('hidden');
-}
-
-function showNext() {
-  currentIndex = (currentIndex + 1) % imageList.length;
-  openModal(currentIndex);
-}
-
-function showPrev() {
-  currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
-  openModal(currentIndex);
-}
+function closeModal() { modal.classList.add('hidden'); }
+function showNext() { currentIndex = (currentIndex + 1) % imageList.length; openModal(currentIndex); }
+function showPrev() { currentIndex = (currentIndex - 1 + imageList.length) % imageList.length; openModal(currentIndex); }
 
 function deleteImage() {
   const img = imageList[currentIndex];
@@ -90,4 +88,5 @@ document.getElementById('next-img').onclick = showNext;
 document.getElementById('delete-btn').onclick = deleteImage;
 document.getElementById('move-btn').onclick = moveImage;
 
-loadImages(); // Initial load
+loadImages(); // initial call
+

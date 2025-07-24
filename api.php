@@ -1,8 +1,9 @@
 <?php
-$root = realpath(__DIR__ . '/../'); // goes up one level to /images
+$root = realpath(__DIR__ . '/../'); // one level up to /images
 
 function safe_path($path) {
   global $root;
+  if (trim($path) === '') return $root;
   $full = realpath($root . '/' . $path);
   if (!$full || strpos($full, $root) !== 0) die("Invalid path");
   return $full;
@@ -10,20 +11,20 @@ function safe_path($path) {
 
 function generate_thumbnail($src, $thumb_path) {
   if (file_exists($thumb_path)) return;
-
   $ext = strtolower(pathinfo($src, PATHINFO_EXTENSION));
-  $img = null;
+  if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) return;
 
-  if ($ext === 'jpg' || $ext === 'jpeg') $img = imagecreatefromjpeg($src);
-  elseif ($ext === 'png') $img = imagecreatefrompng($src);
-  elseif ($ext === 'webp') $img = imagecreatefromwebp($src);
-  else return;
+  $img = match($ext) {
+    'jpg', 'jpeg' => imagecreatefromjpeg($src),
+    'png'        => imagecreatefrompng($src),
+    'webp'       => imagecreatefromwebp($src),
+    default      => null
+  };
 
   if (!$img) return;
 
   $thumb_width = 300;
   $thumb_height = 300;
-
   $width = imagesx($img);
   $height = imagesy($img);
   $scale = min($thumb_width / $width, $thumb_height / $height);
@@ -49,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
   foreach ($files as $file) {
     if ($file === '.' || $file === '..') continue;
     $full = "$path/$file";
-    #    $relative = "$dir/$file";
     $relative = ltrim($dir . '/' . $file, '/');
+
     if (is_dir($full)) {
       $out[] = [ "name" => $file, "type" => "dir" ];
     } else if (preg_match('/\.(jpg|jpeg|png|webp|gif)$/i', $file)) {
@@ -64,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
       ];
     }
   }
+
   header('Content-Type: application/json');
   echo json_encode($out);
   exit;
@@ -85,3 +87,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   exit;
 }
+
