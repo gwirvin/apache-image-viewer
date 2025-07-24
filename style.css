@@ -29,12 +29,15 @@ body {
   align-items: center;
   justify-content: center;
   color: #ffd700;
-  font-size: 1.1em;
+  font-size: 1.2em;
+  font-weight: bold;
+  border: 3px solid #666;
 }
 
 .folder:hover {
   background: #555;
   border-color: #ffd700;
+  color: #fff;
 }
 
 #modal {
