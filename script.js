@@ -1,4 +1,5 @@
-const root = '/viewer';  // Adjust if your structure changes
+//const root = '/viewer';  // Adjust if your structure changes
+const root = ''; // No need to use /viewer since images.irvin.lan is root
 
 // Load folder contents
 function loadDirectory(path) {
@@ -58,7 +59,9 @@ function renderImages(images) {
       image.src = img.thumb;
       image.className = 'thumbnail';
 //      image.dataset.full = `${root}/${img.path}`;
-      image.dataset.full = img.path;
+//      image.dataset.full = encodeURIComponent(img.path);
+//       image.dataset.full = img.path;
+      image.dataset.full = encodeURIComponent(img.path.replace(/^\//, ''));
       image.addEventListener('click', () => openModal(image.dataset.full));
       grid.appendChild(image);
     });
@@ -66,10 +69,19 @@ function renderImages(images) {
 }
 
 // Modal functions
+//function openModal(src) {
+//  const modal = document.getElementById('modal');
+//  const img = modal.querySelector('img');
+//  img.src = src;
+//  img.src = '/' + decodeURIComponent(src);
+//  modal.classList.remove('hidden');
+//}
+
 function openModal(src) {
   const modal = document.getElementById('modal');
   const img = modal.querySelector('img');
-  img.src = src;
+  const decodedPath = decodeURIComponent(src);
+  img.src = decodedPath.startsWith('/') ? decodedPath : '/' + decodedPath;
   modal.classList.remove('hidden');
 }
 

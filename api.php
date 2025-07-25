@@ -1,5 +1,6 @@
 <?php
 /*$root = realpath(__DIR__ . '/../'); // one level up to /images (where symlinks are)*/
+$root = realpath(__DIR__);
 
 /*function safe_path($path) {
   global $root;
@@ -9,8 +10,15 @@
   return $full;
 }*/
 
+/* function safe_path($path) {
+  global $root;
+  $clean = str_replace('..', '', $path); // Prevent parent traversal
+  return rtrim($root . '/' . ltrim($clean, '/'), '/');
+} */
+
 function safe_path($path) {
   global $root;
+  if (trim($path) === '') return $root; // <-- catch empty early
   $clean = str_replace('..', '', $path); // Prevent parent traversal
   return rtrim($root . '/' . ltrim($clean, '/'), '/');
 }
