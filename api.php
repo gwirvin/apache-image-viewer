@@ -80,21 +80,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $full = "$path/$file";
     $relative = ltrim($dir . '/' . $file, '/');
 
-    if (is_dir($full)) {
-      $out[] = [ "name" => $file, "type" => "dir" ];
-    } else if (preg_match('/\.(jpg|jpeg|png|webp|gif)$/i', $file)) {
-      $thumb = $root . '/.thumbnails/' . $relative;
-      generate_thumbnail($full, $thumb);
-      $out[] = [
-        "name" => $file,
-	"type" => "file",
-	/*	"path" => "/$relative", */
-	/*        "path" => "/images/$relative", */
-	"path" => "$relative",
-        "thumb" => "/.thumbnails/$relative"
-      ];
-    }
+  if (is_dir($full)) {
+    if (in_array($file, ['.thumbnails', 'viewer'])) continue; // Skip hidden dirs
+    $out[] = [ "name" => $file, "type" => "dir" ];
+  } else if (preg_match('/\.(jpg|jpeg|png|webp|gif)$/i', $file)) {
+    $thumb = $root . '/.thumbnails/' . $relative;
+    generate_thumbnail($full, $thumb);
+    $out[] = [
+      "name" => $file,
+      "type" => "file",
+      "path" => "$relative",
+      "thumb" => "/.thumbnails/$relative"
+    ];
   }
+}
 
   header('Content-Type: application/json');
   echo json_encode($out);

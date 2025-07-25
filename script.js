@@ -1,9 +1,9 @@
-//const root = '/viewer';  // Adjust if your structure changes
-const root = ''; // No need to use /viewer since images.irvin.lan is root
+let currentImages = [];
+let currentIndex = -1;
 
 // Load folder contents
 function loadDirectory(path) {
-  fetch(`${root}/api.php?dir=${encodeURIComponent(path)}`)
+  fetch(`/api.php?dir=${encodeURIComponent(path)}`)
     .then(res => res.json())
     .then(data => {
       updateBreadcrumb(path);
@@ -49,39 +49,34 @@ function renderFolders(folders, path) {
   }
 }
 
-// Render thumbnails
+// ✅ Render thumbnails and store them for modal navigation
 function renderImages(images) {
   const grid = document.getElementById('image-grid');
   grid.innerHTML = '';
+  currentImages = images;
+
   if (images && images.length) {
-    images.forEach(img => {
+    images.forEach((img, index) => {
       const image = document.createElement('img');
       image.src = img.thumb;
       image.className = 'thumbnail';
-//      image.dataset.full = `${root}/${img.path}`;
-//      image.dataset.full = encodeURIComponent(img.path);
-//       image.dataset.full = img.path;
-      image.dataset.full = encodeURIComponent(img.path.replace(/^\//, ''));
-      image.addEventListener('click', () => openModal(image.dataset.full));
+      image.addEventListener('click', () => openModal(index)); // use index
       grid.appendChild(image);
     });
   }
 }
 
-// Modal functions
-//function openModal(src) {
-//  const modal = document.getElementById('modal');
-//  const img = modal.querySelector('img');
-//  img.src = src;
-//  img.src = '/' + decodeURIComponent(src);
-//  modal.classList.remove('hidden');
-//}
-
-function openModal(src) {
+// ✅ Modal control functions
+function openModal(index) {
   const modal = document.getElementById('modal');
   const img = modal.querySelector('img');
-  const decodedPath = decodeURIComponent(src);
-  img.src = decodedPath.startsWith('/') ? decodedPath : '/' + decodedPath;
+
+  if (index < 0 || index >= currentImages.length) return;
+
+  currentIndex = index;
+  const src = currentImages[index].path;
+  const decoded = decodeURIComponent(src);
+  img.src = decoded.startsWith('/') ? decoded : '/' + decoded;
   modal.classList.remove('hidden');
 }
 
@@ -91,9 +86,23 @@ function closeModal() {
   modal.querySelector('img').src = '';
 }
 
+// ✅ Modal nav buttons
+function showPrevImage() {
+  if (currentIndex > 0) openModal(currentIndex - 1);
+}
+
+function showNextImage() {
+  if (currentIndex < currentImages.length - 1) openModal(currentIndex + 1);
+}
+
+// Hook up close button
 document.getElementById('close-modal').addEventListener('click', closeModal);
 
-// Breadcrumb clicks
+// ✅ Hook up modal nav buttons
+document.getElementById('modal-prev').addEventListener('click', showPrevImage);
+document.getElementById('modal-next').addEventListener('click', showNextImage);
+
+// Breadcrumb click
 document.getElementById('breadcrumb').addEventListener('click', function (e) {
   if (e.target.tagName === 'A') {
     e.preventDefault();
